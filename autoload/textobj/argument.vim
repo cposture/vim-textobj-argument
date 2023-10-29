@@ -44,7 +44,7 @@ function! s:Move(sep, direction, times, to_end, ...)
 
     " 记录起始光标字符，用于判断是不是括号
     " 如果是括号，则 last 的跳数需要减一，用于跳到括号附近的参数
-    exe "normal! vy"
+    exe "keepjumps normal! vy"
     let oristart = @"
 
     try
@@ -67,12 +67,12 @@ function! s:Move(sep, direction, times, to_end, ...)
                 return
             endif
             " 重新定位起始光标字符
-            exe "normal! vy"
+            exe "keepjumps normal! vy"
             let oristart = @"
         endif
         " 经过 searchpair 此时光标会移动到左括号或分割符上
         " 获取当前光标字符
-        exe "normal! yl"
+        exe "keepjumps normal! yl"
         let first = @"
 
         " times 支持多跳
@@ -90,7 +90,7 @@ function! s:Move(sep, direction, times, to_end, ...)
                     \ (@" =~ a:sep || (a:direction && @" =~ lbracket) || (!a:direction && @" =~ rbracket)) 
                     \ && searchpair(lbracket, a:sep, rbracket, flags, 's:IsCursorOnStringOrComment()') > 0
             let times -= 1
-            exe "normal! yl"
+            exe "keepjumps normal! yl"
         endwhile
         " 记录最后一跳后，当前光标下的字符，可能是左右括号或分割符
         let last = @"
@@ -215,14 +215,14 @@ function! s:Select(sep, outer, times, ...)
             endif
         endif
 
-        exe "normal! ylmb"
+        exe "keepjumps normal! ylmb"
         let first = @"
 
         let times = a:times
         while times > 0 && (@" =~ a:sep || @" =~ lbracket) && searchpair(lbracket, a:sep, rbracket,
                     \ 'W', 's:IsCursorOnStringOrComment()') > 0
             let times -= 1
-            exe "normal! yl"
+            exe "keepjumps normal! yl"
         endwhile
 
         let last = @"
@@ -235,25 +235,25 @@ function! s:Select(sep, outer, times, ...)
         else
             " 在 outer 下，左右两边都是分割符的情况
             if a:sep =~ first && a:sep =~ last
-                exe "normal \<Left>"
+                exe "keepjumps normal! \<Left>"
                 exe "keepjumps normal! me`b"
             elseif a:sep =~ first
                 " 左边为分割符，右边为括号
-                exe "normal \<Left>"
+                exe "keepjumps normal! \<Left>"
                 exe "keepjumps normal! me`b"
             elseif a:sep =~ last
                 " 左边为括号，右边为分割符
                 "
                 call search('\S', 'W')
-                exe "normal \<Left>"
+                exe "keepjumps normal! \<Left>"
                 exe "keepjumps normal! me`b"
-                exe "normal \<Right>"
+                exe "keepjumps normal! \<Right>"
             else
                 " 两边为括号
                 exe "keepjumps normal! me`b"
-                exe "normal \<Right>"
-                exe "normal! mb`e"
-                exe "normal \<Left>"
+                exe "keepjumps normal! \<Right>"
+                exe "keepjumps normal! mb`e"
+                exe "keepjumps normal! \<Left>"
                 exe "keepjumps normal! me`b"
             endif
         endif
